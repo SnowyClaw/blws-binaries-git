@@ -20,16 +20,19 @@ export main='
             <label>Select the brightness level.</label>
           </text>
         </hbox>
+        <text>
+          <label>Current: '"$(xbacklight)"'</label>
+        </text>
         <entry activates_default="true">
           <variable>BENT</variable>
-          <default>'"$(backlight m)"'</default>
+          <default>100</default>
         </entry>
         <hbox>
           <button cancel>
-            <action>backlight "$old"</action>
+            <action>xbacklight = "$old"</action>
           </button>
           <button ok>
-            <action>backlight "$BENT"</action>
+            <action>xbacklight = "$BENT"</action>
           </button>
         </hbox>
       </vbox>
@@ -156,7 +159,7 @@ export main='
 </window>
 '
 
-export old=`backlight c`
+export old=`xbacklight`
 
 I=$IFS; IFS=""
 for STATEMENTS in  $(gtkdialog --program=main); do
@@ -165,5 +168,5 @@ done
 IFS=$I
 
 if [ "$EXIT" == "Cancel" ]; then
-	backlight $old
+	xbacklight = $old
 fi
