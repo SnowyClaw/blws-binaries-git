@@ -1,0 +1,179 @@
+#!/bin/bash
+if [ "$1" == "stop" ]; then
+	pkill -u "$USER" battery-checker
+fi
+
+sleep 10 #Give time for startup. (Because it'll be ran on compiz startup.)
+
+rising(){
+	echo "Stat: Charged to $nstate."
+	mpg123 "/usr/share/SS/System/Sounds/$USER/Battery $nstate.mp3" &
+	msg="Battery status switched from $STATE to $nstate."
+	mode="G"
+	dialog
+	STATE="$nstate"
+}
+
+falling(){
+	echo "Stat: Discharged to $nstate."
+	mpg123 "/usr/share/SS/System/Sounds/$USER/Battery $nstate.mp3" &
+	msg="Battery status switched from $STATE to $nstate..."
+	mode="B"
+	dialog
+	STATE="$nstate"
+}
+
+dialog(){
+	export MainG='
+	<window title="Battery Checker" window_position="1" icon-name="gtk-dialog-info">
+		<vbox>
+			<hbox>
+				<pixmap icon_size="3">
+					<input file stock="gtk-ok"></input>
+				</pixmap>
+				<text>
+					<label>'"$msg"'</label>
+				</text>
+			</hbox>
+			<hbox>
+				<button ok></button>
+			</hbox>
+		</vbox>
+	</window>
+	'
+	export MainB='
+	<window title="Battery Checker" window_position="1" icon-name="gtk-dialog-info">
+		<vbox>
+			<hbox>
+				<pixmap icon_size="3">
+					<input file stock="gtk-no"></input>
+				</pixmap>
+				<text>
+					<label>'"$msg"'</label>
+				</text>
+			</hbox>
+			<hbox>
+				<button ok></button>
+			</hbox>
+		</vbox>
+	</window>
+	'
+	if [ "$mode" == "G" ]; then
+		gtkdialog --program="MainG" &
+	else gtkdialog --program="MainB" &
+	fi
+}
+
+#States: Empty, Critical, Low,   Ok,    Good,  Best
+#Levels: 0,     1-10,     11-30, 31-45, 46-75, 76+
+
+STATE="Empty"
+
+while [ true ]; do
+	level=`upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep percentage | cut -d ":" -f 2 | cut -d "%" -f 1`
+	level=`echo $level`
+	
+	if [ "$STATE" == "Empty" ] && [ "$level" == "0" ]; then #Empty, still empty.
+		echo "Stat: Still empty..."
+	elif [ "$STATE" == "Empty" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Empty, raised to critical.
+		nstate="Critical"
+		rising
+	elif [ "$STATE" == "Empty" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Empty, raised to low.
+		nstate="Low"
+		rising
+	elif [ "$STATE" == "Empty" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Empty, raised to ok.
+		nstate="Okay"
+		rising
+	elif [ "$STATE" == "Empty" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Empty, raised to good.
+		nstate="Good"
+		rising
+	elif [ "$STATE" == "Empty" ] && [ "$level" -gt "75" ]; then #Empty, raised to best.
+		nstate="Best"
+		rising
+	elif [ "$STATE" == "Critical" ] && [ "$level" == "0" ]; then #Critical, fell to empty.
+		nstate="Empty"
+		falling
+	elif [ "$STATE" == "Critical" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Critical, still critical.
+		echo "Stat: Still critical..."
+	elif [ "$STATE" == "Critical" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Critical, raised to low.
+		nstate="Low"
+		rising
+	elif [ "$STATE" == "Critical" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Critical, raised to ok.
+		nstate="Okay"
+		rising
+	elif [ "$STATE" == "Critical" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Critical, raised to good.
+		nstate="Good"
+		rising
+	elif [ "$STATE" == "Critical" ] && [ "$level" -gt "75" ]; then #Critical, raised to best.
+		nstate="Best"
+		rising
+	elif [ "$STATE" == "Low" ] && [ "$level" == "0" ]; then #Low, fell to empty.
+		nstate="Empty"
+		falling
+	elif [ "$STATE" == "Low" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Low, fell to critical.
+		nstate="Critical"
+		falling
+	elif [ "$STATE" == "Low" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Low, still low.
+		echo "Stat: Still low..."
+	elif [ "$STATE" == "Low" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Low, raised to ok.
+		nstate="Okay"
+		rising
+	elif [ "$STATE" == "Low" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Low, raised to good.
+		nstate="Good"
+		rising
+	elif [ "$STATE" == "Low" ] && [ "$level" -gt "75" ]; then #Low, raised to best.
+		nstate="Best"
+		rising
+	elif [ "$STATE" == "Okay" ] && [ "$level" == "0" ]; then #Okay, fell to empty.
+		nstate="Empty"
+		falling
+	elif [ "$STATE" == "Okay" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Okay, fell to critical.
+		nstate="Critical"
+		falling
+	elif [ "$STATE" == "Okay" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Okay, fell to low.
+		nstate="Low"
+		falling
+	elif [ "$STATE" == "Okay" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Okay, still ok.
+		echo "Stat: Still okay..."
+	elif [ "$STATE" == "Okay" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Okay, raised to good.
+		nstate="Good"
+		rising
+	elif [ "$STATE" == "Okay" ] && [ "$level" -gt "75" ]; then #Okay, raised to best.
+		nstate="Best"
+		rising
+	elif [ "$STATE" == "Good" ] && [ "$level" == "0" ]; then #Good, fell to empty.
+		nstate="Empty"
+		falling
+	elif [ "$STATE" == "Good" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Good, fell to critical.
+		nstate="Critical"
+		falling
+	elif [ "$STATE" == "Good" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Good, fell to low.
+		nstate="Low"
+		falling
+	elif [ "$STATE" == "Good" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Good, fell to ok.
+		nstate="Okay"
+		falling
+	elif [ "$STATE" == "Good" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Good, still good.
+		echo "Stat: Still good..."
+	elif [ "$STATE" == "Good" ] && [ "$level" -gt "75" ]; then #Good, raised to best.
+		nstate="Best"
+		rising
+	elif [ "$STATE" == "Best" ] && [ "$level" == "0" ]; then #Best, fell to empty.
+		nstate="Empty"
+		falling
+	elif [ "$STATE" == "Best" ] && [ "$level" -gt "0" ] && [ "$level" -lt "11" ]; then #Best, fell to critical.
+		nstate="Critical"
+		falling
+	elif [ "$STATE" == "Best" ] && [ "$level" -gt "10" ] && [ "$level" -lt "31" ]; then #Best, fell to low.
+		nstate="Low"
+		falling
+	elif [ "$STATE" == "Best" ] && [ "$level" -gt "30" ] && [ "$level" -lt "46" ]; then #Best, fell to ok.
+		nstate="Okay"
+		falling
+	elif [ "$STATE" == "Best" ] && [ "$level" -gt "45" ] && [ "$level" -lt "76" ]; then #Best, fell to good.
+		nstate="Good"
+		falling
+	elif [ "$STATE" == "Best" ] && [ "$level" -gt "75" ]; then #Best, still best.
+		echo "Stat: Still best..."
+	fi
+done

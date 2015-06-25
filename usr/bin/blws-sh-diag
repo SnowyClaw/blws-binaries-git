@@ -1,0 +1,162 @@
+#!/bin/bash
+
+pt(){
+if [ "$1" == "i" ]; then
+	printf "$(tput bold)$(tput setaf 4)[  INFO  ] $(tput sgr0)$2\n"
+elif [ "$1" == "o" ]; then
+	printf "$(tput bold)$(tput setaf 2)[   OK   ] $(tput sgr0)$2\n"
+elif [ "$1" == "w" ]; then
+	printf "$(tput bold)$(tput setaf 3)[AVRTISMT] $(tput sgr0)$2\n"
+elif [ "$1" == "f" ]; then
+	printf "$(tput bold)$(tput setaf 1)[  ÉCHE  ] $(tput sgr0)$2\n"
+elif [ "$1" == "d" ]; then
+	printf "$(tput bold)$(tput setaf 5)[PROMTEUR] $(tput sgr0)$2\n"
+else printf "$(tput setaf 7)[      ] $(tput sgr0)$2\n"
+fi
+}
+
+export diag='
+<window title="Éteindre..." window_position="1" icon-name="gtk-dialog-question">
+<vbox>
+  <frame Options d'"'"'arrêt>
+    <hbox>
+      <vbox homogeneous="true">
+        <radiobutton active="true">
+          <label>Éteindre</label>
+          <variable>SH</variable>
+          <action>if true enable:shutdown</action>
+          <action>if false disable:shutdown</action>
+        </radiobutton>
+        <radiobutton active="false">
+          <label>Redémarrer</label>
+          <variable>RB</variable>
+          <action>if true enable:reboot</action>
+          <action>if false disable:reboot</action>
+        </radiobutton>
+        <radiobutton active="false">
+          <label>Se déconnecter</label>
+          <variable>LO</variable>
+          <action>if true enable:logout</action>
+          <action>if false disable:logout</action>
+        </radiobutton>
+        <radiobutton active="false">
+          <label>Coucher</label>
+          <variable>S</variable>
+          <action>if true enable:sleep</action>
+          <action>if false disable:sleep</action>
+        </radiobutton>
+        <radiobutton active="false">
+          <label>Verrouiller</label>
+          <variable>L</variable>
+          <action>if true enable:lock</action>
+          <action>if false disable:lock</action>
+        </radiobutton>
+        <radiobutton active="false">
+          <label>Changer d'"'"'utilisateur</label>
+          <variable>SW</variable>
+          <action>if true enable:switch</action>
+          <action>if false disable:switch</action>
+        </radiobutton>
+      </vbox>
+      <vbox>
+        <pixmap>
+          <variable>shutdown</variable>
+          <sensitive>true</sensitive>
+          <input file>/usr/bin/blws-images/system-shutdown.svg</input>
+        </pixmap>
+        <pixmap>
+          <variable>reboot</variable>
+          <sensitive>false</sensitive>
+          <input file>/usr/bin/blws-images/system-reboot.svg</input>
+        </pixmap>
+        <pixmap>
+          <variable>logout</variable>
+          <sensitive>false</sensitive>
+          <input file>/usr/bin/blws-images/system-log-out.svg</input>
+        </pixmap>
+        <pixmap>
+          <variable>sleep</variable>
+          <sensitive>false</sensitive>
+          <input file>/usr/bin/blws-images/system-lock-screen.svg</input>
+        </pixmap>
+        <pixmap>
+          <variable>lock</variable>
+          <sensitive>false</sensitive>
+          <input file>/usr/bin/blws-images/system-lock-screen.svg</input>
+        </pixmap>
+        <pixmap>
+          <variable>switch</variable>
+          <sensitive>false</sensitive>
+          <input file>/usr/bin/blws-images/system-lock-screen.svg</input>
+        </pixmap>
+      </vbox>
+    </hbox>
+    <hbox>
+    	<checkbox>
+    	  <label>Verrouiller lors de la commutation utilisateurs</label>
+    	  <variable>LSW</variable>
+    	</checkbox>
+    </hbox>
+  </frame>
+  <hbox>
+    <button cancel></button>
+    <button ok>
+    </button>
+  </hbox>
+</vbox>
+</window>
+'
+
+export ERR='
+<window title="Error" window_position="1" icon-name="gtk-dialog-error">
+<vbox>
+  <hbox>
+    <pixmap icon_size="6">
+      <input file stock="gtk-dialog-error"></input>
+    </pixmap>
+    <text>
+      <label>Something has gone wrong while processing your input.</label>
+    </text>
+  </hbox>
+  <button ok></button>
+</vbox>
+</window>
+'
+
+I=$IFS; IFS=""
+for STATEMENTS in  $(gtkdialog --program=diag); do
+  eval $STATEMENTS
+done
+IFS=$I
+
+if [ "$EXIT" == "OK" ]; then
+	if [ "$SH" == "true" ]; then
+		blws-cleanup
+		rm "$HOME/.SHLCK"
+		systemctl poweroff
+	elif [ "$RB" == "true" ]; then
+		blws-cleanup
+		rm "$HOME/.SHLCK"
+		systemctl reboot
+	elif [ "$LO" == "true" ]; then
+		blws-cleanup
+		rm "$HOME/.SHLCK"
+		blws-compiz-logout
+	elif [ "$S" == "true" ]; then
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		i3lock -i /usr/share/SS/System/Lock.png &
+		systemctl suspend
+	elif [ "$L" == "true" ]; then
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		i3lock -i /usr/share/SS/System/Lock.png &
+	elif [ "$SW" == "true" ] && [ "$LSW" == "true" ]; then
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		i3lock -i /usr/share/SS/System/Lock.png &
+		lxdm -c USER_SWITCH
+	elif [ "$SW" == "true" ]; then
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		lxdm -c USER_SWITCH
+	else gtkdialog --program=ERR &>/dev/null
+	fi
+fi
+exit

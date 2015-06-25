@@ -1,0 +1,71 @@
+#!/bin/bash
+
+pid=$$
+
+theendisnever(){
+	for i in `seq 1 99`; do
+		printf "The end is never "
+	done
+	printf "\n"
+}
+
+Shuffle-Main(){
+	while [ true ]; do
+		dialog --backtitle "$(theendisnever)" --infobox "Shuffling through wallpapers. Press CTRL+C to quit." 0 0
+		if [ ! -e "/usr/share/SS/Themes/$th" ]; then
+			dialog --backtitle "blws-compiz-wallpaper" --msgbox "That theme does not exist." 0 0
+			exit
+		fi
+		cd "/usr/share/SS/Themes/$th/Gfx/"
+		files=$(for f in *; do echo "$f" | cut -d "." -f 1; done)
+		max=`echo "$files" | awk 'BEGIN {max = 0} {if ($1>max) max=$1} END {print max}'`
+		i=$(shuf -i 1-$max -n 1)
+		gsettings set org.compiz.wallpaper:/org/compiz/profiles/Default/plugins/wallpaper/ bg-image "['/usr/share/SS/Themes/$th/Gfx/$i.jpg']"
+		sleep "$time"
+	done
+}
+
+Main(){
+	i=1
+	while [ true ]; do
+		dialog --backtitle "$(theendisnever)" --infobox "Looping through wallpapers. Press CTRL+C to quit." 0 0
+		if [ ! -e "/usr/share/SS/Themes/$th" ]; then
+			dialog --backtitle "blws-compiz-wallpaper" --msgbox "That theme does not exist." 0 0
+			exit
+		fi
+		gsettings set org.compiz.wallpaper:/org/compiz/profiles/Default/plugins/wallpaper/ bg-image "['/usr/share/SS/Themes/$th/Gfx/$i.jpg']"
+		i=$(($i + 1))
+		if [ ! -e "/usr/share/SS/Themes/$th/Gfx/$i.jpg" ]; then # Next file missing.
+			i=1 # Restart the loop
+		fi
+		sleep "$time"
+	done
+}
+
+UI(){
+	dialog --backtitle "blws-compiz-wallpaper" --inputbox "Enter the name of a theme." 0 0 2>/tmp/blws-$pid
+	res=$? #0: OK, 1: Cancelled, 255: ESC'd
+	if [ "$res" == "1" ] || [ "$res" == "255" ]; then
+		dialog --backtitle "blws-compiz-wallpaper" --msgbox "Cancelled." 0 0
+		exit
+	fi
+	th=`cat /tmp/blws-$pid`
+	rm /tmp/blws-$pid
+	dialog --backtitle "blws-compiz-wallpaper" --rangebox "Select the time between changes.\nControls:\nDown: Increase\nUp: Decrease\nPage down: Fast increase\nPage up: Fast decrease" 0 0 1 9999 10 2>/tmp/blws-$pid
+	res=$? #0: OK, 1: Cancelled, 255: ESC'd
+	if [ "$res" == "1" ] || [ "$res" == "255" ]; then
+		dialog --backtitle "blws-compiz-wallpaper" --msgbox "Cancelled." 0 0
+		exit
+	fi
+	time=`cat /tmp/blws-$pid`
+	time=$(($time + 0)) #Why is this here? It gets rid of an extra space in the number. :P
+	rm /tmp/blws-$pid
+	dialog --backtitle "blws-compiz-wallpaper" --yesno "Would you like to shuffle the images?" 0 0
+	res=$? #0: Yes, 1: No
+	if [ "$res" == "1" ]; then #No
+		Main
+	else Shuffle-Main
+	fi
+}
+
+UI

@@ -1,0 +1,3 @@
+mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+pkill -u $USER compiz
+touch "/tmp/COMPIZ-SHUTDOWN-$USER"

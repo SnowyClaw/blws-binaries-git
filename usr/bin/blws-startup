@@ -1,0 +1,29 @@
+#!/bin/bash
+
+export err='
+<window title="Error" window_position="1" icon-name="gtk-dialog-error">
+	<vbox>
+		<hbox>
+			<pixmap icon_size="6">
+				<input file stock="gtk-dialog-error"></input>
+			</pixmap>
+			<text>
+				<label>You already ran the script. Try again after a logout.</label>
+			</text>
+		</hbox>
+		<button ok></button>
+	</vbox>
+</window>
+'
+
+if [ -e "$HOME/.SHLCK" ]; then
+	gtkdialog --program=err
+	exit
+fi
+
+if [ ! -e "$HOME/.AUTOSTART" ]; then
+	echo "#Every application needs to be ran in the background. For example, skype &. Put & after every command." >"$HOME/.AUTOSTART"
+	chmod u=rwx "$HOME/.AUTOSTART"
+fi
+bash -c "bash \"$HOME/.AUTOSTART\""
+echo "" >"$HOME"/.SHLCK

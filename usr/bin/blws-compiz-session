@@ -1,0 +1,20 @@
+if [ $UID -ne 0 ]; then
+	cairo-dock &
+	compiz &
+	blws-startup &
+	terminator -e blws-network-gtk &
+	blws-battery-checker &
+	terminator -e blws-compiz-wallpaper &
+		while [ ! -e "/tmp/COMPIZ-SHUTDOWN-$USER" ]; do
+		sleep 1
+	done
+	rm "/tmp/COMPIZ-SHUTDOWN-$USER"
+	exit
+fi
+compiz &
+startup &
+while [ ! -e "/tmp/COMPIZ-SHUTDOWN-$USER" ]; do
+	sleep 1
+done
+rm "/tmp/COMPIZ-SHUTDOWN-$USER"
+exit

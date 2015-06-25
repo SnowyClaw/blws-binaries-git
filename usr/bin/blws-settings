@@ -1,0 +1,141 @@
+#!/bin/bash
+
+if [ ! -e "$HOME/.BOS" ]; then
+	echo "0x0:-None-" >"$HOME/.BOS"
+	echo "0x1:Pointless" >>"$HOME/.BOS"
+fi
+BOSSETTINGS=`cat ~/.BOS`
+export SHSND=`echo "$BOSSETTINGS" | grep 0x0 | cut -d ":" -f 2`
+
+export main='
+<window title="Settings" window_position="1" icon-name="gtk-properties">
+  <vbox>
+    <notebook labels="Helpful Apps|Files|Shutdown">
+      <vbox>
+        <hbox>
+          <pixmap icon_size="6">
+            <input file stock="gtk-dialog-info"></input>
+          </pixmap>
+          <text>
+          	<label>Here are some useful applications to open. Some require root permissions.</label>
+          </text>
+        </hbox>
+        <checkbox>
+        	<label>Run as superuser</label>
+        	<variable>SD</variable>
+        </checkbox>
+        <hbox>
+        	<button>
+        		<label>LXappearance</label>
+        		<action condition="active_is_false(SD)">lxappearance &</action>
+        		<action condition="active_is_true(SD)">gksudo --message "Asking for password by request..." "lxappearance &" &</action>
+        	</button>
+        	<button>
+        		<label>GTK2 Settings</label>
+        		<action condition="active_is_false(SD)">gtk2_prefs &</action>
+        		<action condition="active_is_true(SD)">gksudo --message "Asking for password by request..." "gtk2_prefs &" &</action>
+        	</button>
+        	<button>
+        		<label>MDM Settings</label>
+        		<action>gksudo --message "MDM Settings requires root permissions. Please type your password below." "mdmsetup" &</action>
+        	</button>
+        </hbox>
+        <hbox>
+        	<button>
+        		<label>CCSM</label>
+        		<action condition="active_is_false(SD)">ccsm &</action>
+        	</button>
+        	<button>
+        		<label>Emerald Theme Manager</label>
+        		<action condition="active_is_false(SD)">emerald-theme-manager &</action>
+        		<action condition="active_is_true(SD)">gksudo --message "Asking for password by request..." "emerald-theme-manager &" &</action>
+        	</button>
+        	<button>
+        		<label>Pulseaudio Settings</label>
+        		<action condition="active_is_false(SD)">pavucontrol &</action>
+        	</button> 
+        </hbox>
+      </vbox>
+      <vbox>
+      		<frame Other>
+      			<hbox>
+      				<button>
+      					<label>.AUTOSTART</label>
+      					<action>leafpad ~/.AUTOSTART &</action>
+      				</button>
+      			</hbox>
+      		</frame>
+		<frame Terminal Stuff>
+			<hbox>
+				<button>
+					<label>.bashrc</label>
+					<action>leafpad ~/.bashrc &</action>
+				</button>
+				<button>
+					<label>.bash_profile</label>
+					<action>leafpad ~/.bash_profile &</action>
+				</button>
+			</hbox>
+		</frame>
+		<frame Applications>
+			<hbox>
+				<button>
+					<label>sh-diag</label>
+					<action>leafpad /usr/bin/sh-diag &</action>
+				</button>
+				<button>
+					<label>startup</label>
+					<action>leafpad /usr/bin/startup &</action>
+				</button>
+				<button>
+					<label>settings</label>
+					<action>leafpad /usr/bin/settings &</action>
+				</button>
+				<button>
+					<label>compiz-logout</label>
+					<action>leafpad /usr/bin/compiz-logout &</action>
+				</button>
+				<button>
+					<label>~/Bin/apps</label>
+					<action>leafpad ~/Bin/apps &</action>
+				</button>
+			</hbox>
+		</frame>
+      </vbox>
+      <vbox>
+		<hbox>
+			<pixmap icon_size="6">
+				<input file stock="gtk-dialog-info"></input>
+			</pixmap>
+			<text>
+				<label>Set some shutdown options here.</label>
+			</text>
+		</hbox>
+		<hbox>
+			<text>
+				<label>Shutdown sound:</label>
+			</text>
+			<entry sensitive="false">
+				<default>'"$SHSND"'</default>
+				<variable>SHSND</variable>
+			</entry>
+			<button sensitive="false">
+				<label>Save</label>
+				<action>echo ""</action>
+			</button>
+		</hbox>
+      </vbox>
+    </notebook>
+    <hbox>
+      <button cancel></button>
+      <button ok></button>
+    </hbox>
+  </vbox>
+</window>
+'
+
+I=$IFS; IFS=""
+for STATEMENTS in  $(gtkdialog --program=main); do
+  eval $STATEMENTS
+done
+IFS=$I

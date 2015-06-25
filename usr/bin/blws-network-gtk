@@ -1,0 +1,28 @@
+#!/bin/bash
+print-program(){
+	ping -s 0 -w 1 google.com &>/dev/null
+	if [ "$?" != "0" ]; then
+		echo "[$ctime] Failed..."
+	else echo "[$ctime] Up."
+	fi
+	sleep 2
+}
+
+stat="off"
+
+while [ true ]; do
+	ctime=`date +%T`
+	write=`print-program`
+	echo "$write"
+	write=`echo "$write" | grep Up`
+	if [ -z "$write" ] && [ "$stat" == "on" ]; then #Was online, now failed.
+		stat="off"
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Network Down.mp3" &>/dev/null &
+		echo "[$ctime] Failed..." >>~/Desktop/Network\ Gtk.log
+	elif [ ! -z "$write" ] && [ "$stat" == "off" ]; then #Was offline, now online.
+		stat="on"
+		mpg123 "/usr/share/SS/System/Sounds/$USER/Network Up.mp3" &>/dev/null &
+		echo "[$ctime] Up." >>~/Desktop/Network\ Gtk.log
+	fi
+	done
+exit
