@@ -10,7 +10,29 @@ export SHSND=`echo "$BOSSETTINGS" | grep 0x0 | cut -d ":" -f 2`
 export main='
 <window title="Settings" window_position="1" icon-name="gtk-properties">
   <vbox>
-    <notebook labels="Helpful Apps|Files|Shutdown">
+    <notebook labels="Brightness|Helpful Apps|Files|Shutdown">
+      <vbox>
+        <hbox>
+          <pixmap icon_size="6">
+            <input file stock="gtk-dialog-info"></input>
+          </pixmap>
+          <text>
+            <label>Select the brightness level.</label>
+          </text>
+        </hbox>
+        <entry activates_default="true">
+          <variable>BENT</variable>
+          <default>'"$(backlight m)"'</default>
+        </entry>
+        <hbox>
+          <button cancel>
+            <action>backlight "$old"</action>
+          </button>
+          <button ok>
+            <action>backlight "$BENT"</action>
+          </button>
+        </hbox>
+      </vbox>
       <vbox>
         <hbox>
           <pixmap icon_size="6">
@@ -134,8 +156,14 @@ export main='
 </window>
 '
 
+export old=`backlight c`
+
 I=$IFS; IFS=""
 for STATEMENTS in  $(gtkdialog --program=main); do
   eval $STATEMENTS
 done
 IFS=$I
+
+if [ "$EXIT" == "Cancel" ]; then
+	backlight $old
+fi
