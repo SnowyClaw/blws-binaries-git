@@ -2,57 +2,57 @@
 
 pt(){
 if [ "$1" == "i" ]; then
-	printf "$(tput bold)$(tput setaf 4)[  INFO  ] $(tput sgr0)$2\n"
+	printf "$(tput bold)$(tput setaf 4)[INFO] $(tput setaf 7)$2\n"
 elif [ "$1" == "o" ]; then
-	printf "$(tput bold)$(tput setaf 2)[   OK   ] $(tput sgr0)$2\n"
+	printf "$(tput bold)$(tput setaf 2)[ OK ] $(tput setaf 7)$2\n"
 elif [ "$1" == "w" ]; then
-	printf "$(tput bold)$(tput setaf 3)[AVRTISMT] $(tput sgr0)$2\n"
+	printf "$(tput bold)$(tput setaf 3)[WARN] $(tput setaf 7)$2\n"
 elif [ "$1" == "f" ]; then
-	printf "$(tput bold)$(tput setaf 1)[  ÉCHE  ] $(tput sgr0)$2\n"
+	printf "$(tput bold)$(tput setaf 1)[FAIL] $(tput setaf 7)$2\n"
 elif [ "$1" == "d" ]; then
-	printf "$(tput bold)$(tput setaf 5)[PROMTEUR] $(tput sgr0)$2\n"
-else printf "$(tput setaf 7)[      ] $(tput sgr0)$2\n"
+	printf "$(tput bold)$(tput setaf 5)[DVLP] $(tput setaf 7)$2\n"
+else printf "$(tput sgr0)[ ?? ] $(tput setaf 7)$2\n"
 fi
 }
 
 export diag='
-<window title="Éteindre..." window_position="1" icon-name="gtk-dialog-question">
+<window title="Shutdown..." window_position="1" icon-name="gtk-dialog-question">
 <vbox>
-  <frame Options d'"'"'arrêt>
+  <frame Shutdown Options>
     <hbox>
       <vbox homogeneous="true">
         <radiobutton active="true">
-          <label>Éteindre</label>
+          <label>Shutdown</label>
           <variable>SH</variable>
           <action>if true enable:shutdown</action>
           <action>if false disable:shutdown</action>
         </radiobutton>
         <radiobutton active="false">
-          <label>Redémarrer</label>
+          <label>Restart</label>
           <variable>RB</variable>
           <action>if true enable:reboot</action>
           <action>if false disable:reboot</action>
         </radiobutton>
         <radiobutton active="false">
-          <label>Se déconnecter</label>
+          <label>Logout</label>
           <variable>LO</variable>
           <action>if true enable:logout</action>
           <action>if false disable:logout</action>
         </radiobutton>
         <radiobutton active="false">
-          <label>Coucher</label>
+          <label>Sleep</label>
           <variable>S</variable>
           <action>if true enable:sleep</action>
           <action>if false disable:sleep</action>
         </radiobutton>
         <radiobutton active="false">
-          <label>Verrouiller</label>
+          <label>Lock</label>
           <variable>L</variable>
           <action>if true enable:lock</action>
           <action>if false disable:lock</action>
         </radiobutton>
         <radiobutton active="false">
-          <label>Changer d'"'"'utilisateur</label>
+          <label>Switch user</label>
           <variable>SW</variable>
           <action>if true enable:switch</action>
           <action>if false disable:switch</action>
@@ -93,7 +93,7 @@ export diag='
     </hbox>
     <hbox>
     	<checkbox>
-    	  <label>Verrouiller lors de la commutation utilisateurs</label>
+    	  <label>Lock while switching users</label>
     	  <variable>LSW</variable>
     	</checkbox>
     </hbox>
