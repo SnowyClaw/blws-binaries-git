@@ -1,4 +1,6 @@
 #!/bin/bash
+arg="$1"
+
 print-program(){
 	ping -s 0 -w 1 google.com &>/dev/null
 	if [ "$?" != "0" ]; then
@@ -7,6 +9,12 @@ print-program(){
 	fi
 	sleep 2
 }
+
+if [ "$1" == "stop" ]; then
+	echo "Stopping all instances..."
+	killall -u "$USER" blws-network-gtk
+	exit
+fi
 
 stat="off"
 
@@ -19,10 +27,12 @@ while [ true ]; do
 		stat="off"
 		mpg123 "/usr/share/SS/System/Sounds/$USER/Network Down.mp3" &>/dev/null &
 		echo "[$ctime] Failed..." >>~/Desktop/Network\ Gtk.log
+		notify-send -i network-offline -t 1300 "Network Gtk" "Network down..."
 	elif [ ! -z "$write" ] && [ "$stat" == "off" ]; then #Was offline, now online.
 		stat="on"
 		mpg123 "/usr/share/SS/System/Sounds/$USER/Network Up.mp3" &>/dev/null &
 		echo "[$ctime] Up." >>~/Desktop/Network\ Gtk.log
+		notify-send -i network-idle -t 1300 "Network Gtk" "Network up."
 	fi
 	done
 exit
