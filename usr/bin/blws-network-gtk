@@ -2,7 +2,7 @@
 arg="$1"
 
 print-program(){
-	ping -s 0 -w 1 google.com &>/dev/null
+	ping -s 0 -w 1 4.2.2.1 &>/dev/null
 	if [ "$?" != "0" ]; then
 		echo "[$ctime] Failed..."
 	else echo "[$ctime] Up."
