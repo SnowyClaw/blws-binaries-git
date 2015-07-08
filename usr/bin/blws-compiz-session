@@ -1,5 +1,5 @@
 if [ $UID -ne 0 ]; then
-	mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3"
+	mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3" &
 	xfce4-panel &
 	compiz &
 	blws-startup &
@@ -12,7 +12,7 @@ if [ $UID -ne 0 ]; then
 	rm "/tmp/COMPIZ-SHUTDOWN-$USER"
 	exit
 fi
-mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3"
+mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3" &
 compiz &
 startup &
 while [ ! -e "/tmp/COMPIZ-SHUTDOWN-$USER" ]; do
