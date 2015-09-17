@@ -143,18 +143,18 @@ if [ "$EXIT" == "OK" ]; then
 		rm "$HOME/.SHLCK"
 		blws-compiz-logout
 	elif [ "$S" == "true" ]; then
-		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		canberra-gtk-play -i desktop-logout
 		i3lock -i /usr/share/SS/System/Lock.png &
 		systemctl suspend
 	elif [ "$L" == "true" ]; then
-		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		canberra-gtk-play -i desktop-logout
 		i3lock -i /usr/share/SS/System/Lock.png &
 	elif [ "$SW" == "true" ] && [ "$LSW" == "true" ]; then
-		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		canberra-gtk-play -i desktop-logout
 		i3lock -i /usr/share/SS/System/Lock.png &
 		lxdm -c USER_SWITCH
 	elif [ "$SW" == "true" ]; then
-		mpg123 "/usr/share/SS/System/Sounds/$USER/Logout.mp3"
+		canberra-gtk-play -i desktop-logout
 		lxdm -c USER_SWITCH
 	else gtkdialog --program=ERR &>/dev/null
 	fi

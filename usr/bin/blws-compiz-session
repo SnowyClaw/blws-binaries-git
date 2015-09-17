@@ -1,18 +1,18 @@
 if [ $UID -ne 0 ]; then
-	mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3" &
+	canberra-gtk-play -i desktop-login &
 	xfce4-panel &
 	compiz &
 	blws-startup &
-	terminator -e blws-network-gtk &
+	terminator -HT "Network GTK" -e blws-network-gtk &
 	blws-battery-checker &
-	terminator -e blws-compiz-wallpaper &
+	terminator -HT "Wallpaper" -e blws-compiz-wallpaper &
 		while [ ! -e "/tmp/COMPIZ-SHUTDOWN-$USER" ]; do
 		sleep 1
 	done
 	rm "/tmp/COMPIZ-SHUTDOWN-$USER"
 	exit
 fi
-mpg123 "/usr/share/SS/System/Sounds/$USER/Logon.mp3" &
+canberra-gtk-play -i desktop-login &
 compiz &
 startup &
 while [ ! -e "/tmp/COMPIZ-SHUTDOWN-$USER" ]; do
