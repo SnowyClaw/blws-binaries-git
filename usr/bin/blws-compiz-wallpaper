@@ -2,18 +2,14 @@
 
 pid=$$
 
-theendisnever(){
-	for i in `seq 1 99`; do
-		printf "The end is never "
-	done
-	printf "\n"
+Can(){
+	canberra-gtk-play -i dialog-$1
 }
 
 Shuffle-Main(){
 	while [ true ]; do
-		dialog --backtitle "$(theendisnever)" --infobox "Shuffling through wallpapers. Press CTRL+C to quit." 0 0
 		if [ ! -e "/usr/share/SS/Themes/$th" ]; then
-			dialog --backtitle "blws-compiz-wallpaper" --msgbox "That theme does not exist." 0 0
+			Can error & zenity --window-icon=error --error --title="blws-compiz-wallpaper" --text="That theme does not exist."
 			exit
 		fi
 		cd "/usr/share/SS/Themes/$th/Gfx/"
@@ -28,9 +24,8 @@ Shuffle-Main(){
 Main(){
 	i=1
 	while [ true ]; do
-		dialog --backtitle "$(theendisnever)" --infobox "Looping through wallpapers. Press CTRL+C to quit." 0 0
 		if [ ! -e "/usr/share/SS/Themes/$th" ]; then
-			dialog --backtitle "blws-compiz-wallpaper" --msgbox "That theme does not exist." 0 0
+			Can error & zenity --window-icon=error --error --title="blws-compiz-wallpaper" --text="That theme does not exist."
 			exit
 		fi
 		gsettings set org.compiz.wallpaper:/org/compiz/profiles/Default/plugins/wallpaper/ bg-image "['/usr/share/SS/Themes/$th/Gfx/$i.jpg']"
@@ -43,25 +38,20 @@ Main(){
 }
 
 UI(){
-	dialog --backtitle "blws-compiz-wallpaper" --inputbox "Enter the name of a theme." 0 0 2>/tmp/blws-$pid
-	res=$? #0: OK, 1: Cancelled, 255: ESC'd
-	if [ "$res" == "1" ] || [ "$res" == "255" ]; then
-		dialog --backtitle "blws-compiz-wallpaper" --msgbox "Cancelled." 0 0
+	th=`Can question & zenity --window-icon=question --entry --title="blws-compiz-wallpaper" --text="Enter the name of a theme."`
+	res=$? #1 is cancelled.
+	if [ "$res" == "1" ]; then
+		Can information & zenity --window-icon=info --info --title="blws-compiz-wallpaper" --text="Cancelled."
 		exit
 	fi
-	th=`cat /tmp/blws-$pid`
-	rm /tmp/blws-$pid
-	dialog --backtitle "blws-compiz-wallpaper" --rangebox "Select the time between changes.\nControls:\nDown: Increase\nUp: Decrease\nPage down: Fast increase\nPage up: Fast decrease" 0 0 1 9999 10 2>/tmp/blws-$pid
-	res=$? #0: OK, 1: Cancelled, 255: ESC'd
-	if [ "$res" == "1" ] || [ "$res" == "255" ]; then
-		dialog --backtitle "blws-compiz-wallpaper" --msgbox "Cancelled." 0 0
+	time=`Can question & zenity --window-icon=question --entry --title="blws-compiz-wallpaper" --text="Select the time between changes. (In seconds.)"`
+	res=$? #1 is cancelled
+	if [ "$res" == "1" ]; then
+		Can information & zenity --window-icon=info --info --title="blws-compiz-wallpaper" --text="Cancelled."
 		exit
 	fi
-	time=`cat /tmp/blws-$pid`
-	time=$(($time + 0)) #Why is this here? It gets rid of an extra space in the number. :P
-	rm /tmp/blws-$pid
-	dialog --backtitle "blws-compiz-wallpaper" --yesno "Would you like to shuffle the images?" 0 0
-	res=$? #0: Yes, 1: No
+	Can question & zenity --window-icon=question --question --title="blws-compiz-wallpaper" --text="Would you like to shuffle the images?"
+	res=$? #1 is no.
 	if [ "$res" == "1" ]; then #No
 		Main
 	else Shuffle-Main
